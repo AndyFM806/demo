@@ -1,12 +1,24 @@
-# Etapa 1: Compilación del proyecto
-FROM maven:3.9.4-eclipse-temurin-17 AS build
-WORKDIR /app
-COPY . .
+# ===== Etapa 1: Construcción =====
+FROM maven:3.9.9-eclipse-temurin-21 AS builder
+WORKDIR /build
+
+# Copia el archivo pom.xml y descarga dependencias (mejora cache)
+COPY pom.xml .
+RUN mvn dependency:go-offline
+
+# Ahora copia el código fuente y compila
+COPY src ./src
 RUN mvn clean package -DskipTests
 
-# Etapa 2: Imagen ligera para producción
-FROM eclipse-temurin:17-jdk
+# ===== Etapa 2: Ejecución =====
+FROM eclipse-temurin:21-jdk
 WORKDIR /app
-COPY --from=build /app/target/app.jar app.jar
-EXPOSE 5500
+
+# Copiamos el JAR compilado desde la etapa anterior
+COPY --from=builder /build/target/*.jar app.jar
+
+# Puerto dinámico para Render
+ENV PORT=8080
+EXPOSE 8080
+
 ENTRYPOINT ["java", "-jar", "app.jar"]
