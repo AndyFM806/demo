@@ -13,10 +13,10 @@ public class EmailService {
     
 
     // Tu API Key de Resend
-    private static final String RESEND_API_KEY = "RESEND_API_KEY";
+    private static final String RESEND_API_KEY = "re_GoHwBDL8_A3f5zLgThxtZyLQjMhVUx2Gq";
 
     public void enviarCorreo(String destinatario, String asunto, String cuerpoPlano) {
-        System.out.println("🔑 RESEND_API_KEY: " + (System.getenv("RESEND_API_KEY") != null ? "Cargada correctamente" : "NO encontrada"));
+        
         try {
             // ============================
             // Plantilla HTML profesional
@@ -72,6 +72,7 @@ public class EmailService {
             System.err.println("❌ Error al enviar correo: " + e.getMessage());
             e.printStackTrace();
         }
+        System.out.println("🔑 RESEND_API_KEY: " + (System.getenv("RESEND_API_KEY") != null ? "Cargada correctamente" : "NO encontrada"));
     }
 
     private String escapeHtml(String s) {
