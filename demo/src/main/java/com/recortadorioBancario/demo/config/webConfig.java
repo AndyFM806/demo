@@ -14,18 +14,19 @@ public class webConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        // 🌐 Dominios permitidos
+                        // ✅ DOMINIOS PERMITIDOS
                         .allowedOriginPatterns(
                                 "https://frontrecordatorio.onrender.com", // tu frontend en Render
-                                "http://localhost:5500",                  // pruebas locales
+                                "http://localhost:5500",                 // desarrollo local
                                 "http://127.0.0.1:5500"
                         )
-                        // ✅ Métodos HTTP permitidos
+                        // ✅ MÉTODOS PERMITIDOS
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        // ✅ PERMITE CABECERAS
                         .allowedHeaders("*")
+                        // ✅ PERMITE CREDENCIALES (cookies, tokens)
                         .allowCredentials(true);
             }
         };
     }
 }
-
