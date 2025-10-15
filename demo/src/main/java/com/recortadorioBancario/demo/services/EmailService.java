@@ -1,60 +1,72 @@
 package com.recortadorioBancario.demo.services;
 
 
-import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeMessage;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 @Service
 public class EmailService {
 
-    @Autowired
-    private JavaMailSender mailSender;
+    // Tu API Key de Resend
+    private static final String RESEND_API_KEY = "re_YLcBL1jF_6Avmcd17gEUBGKhK7YcBNWLB";
 
     public void enviarCorreo(String destinatario, String asunto, String cuerpoPlano) {
         try {
-            MimeMessage mime = mailSender.createMimeMessage();
-            // true = multipart (text + html)
-            MimeMessageHelper helper = new MimeMessageHelper(mime, true, "UTF-8");
-
-            // 1) FROM con display name
-            // IMPORTANTE: el address debe ser la cuenta autenticada en SMTP (o el relay puede rechazarlo)
-            InternetAddress from = new InternetAddress("recordatoriobancario@gmail.com", "RecordatorioBancario");
-            helper.setFrom(from);
-
-            // 2) To y subject
-            helper.setTo(destinatario);
-            helper.setSubject(asunto);
-
-            // 3) Reply-To (opcional)
-            helper.setReplyTo(new InternetAddress("recordatoriobancario@gmail.com", "RecordatorioBancario"));
-
-            // 4) Texto plano + HTML simple (evitar HTML inseguro)
+            // ============================
+            // Plantilla HTML profesional
+            // ============================
             String html = """
-                <div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#222">
-                  <p>Hola,</p>
-                  <p>%s</p>
-                  <hr/>
-                  <p style="font-size:12px;color:#666">
-                    Si no deseas recibir estos recordatorios, responde a este correo con "STOP" o contacta a RecordatorioBancario.
-                  </p>
+                <div style="font-family:Arial,Helvetica,sans-serif;
+                            background:#f4f6f8;
+                            color:#333;
+                            padding:20px;
+                            border-radius:10px;
+                            max-width:600px;
+                            margin:auto;">
+                    <h2 style="color:#2a7ae4;text-align:center;">📢 Recordatorio de Pago</h2>
+                    <p>Hola,</p>
+                    <p>%s</p>
+                    <p>Por favor, realiza el pago antes de la fecha indicada para evitar cargos adicionales.</p>
+
+                    <div style="border-top:1px solid #ddd;margin-top:20px;padding-top:10px;font-size:12px;color:#777;text-align:center;">
+                        © 2025 Recordatorio Bancario — Este es un mensaje automático.<br/>
+                        Si no deseas recibir recordatorios, responde con “STOP”.
+                    </div>
                 </div>
             """.formatted(escapeHtml(cuerpoPlano));
 
-            helper.setText(cuerpoPlano, html);
+            // ============================
+            // Construir JSON del correo
+            // ============================
+            String json = """
+                {
+                  "from": "Recordatorio Bancario <notificaciones@resend.dev>",
+                  "to": ["%s"],
+                  "subject": "%s",
+                  "html": "%s"
+                }
+            """.formatted(destinatario, escapeJson(asunto), escapeJson(html));
 
-            // 5) Encabezados recomendados
-            mime.addHeader("X-Priority", "3");
-            mime.addHeader("X-Mailer", "RecordatorioBancario-App");
-            mime.addHeader("List-Unsubscribe", "<mailto:recordatoriobancario@gmail.com>");
+            // ============================
+            // Enviar a la API de Resend
+            // ============================
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.resend.com/emails"))
+                .header("Authorization", "Bearer " + RESEND_API_KEY)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build();
 
-            mailSender.send(mime);
-            System.out.println("✅ Correo enviado a " + destinatario);
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("✅ Resend API status: " + response.statusCode());
+            System.out.println("📨 Response body: " + response.body());
         } catch (Exception e) {
-            // Registrar con detalle
             System.err.println("❌ Error al enviar correo: " + e.getMessage());
             e.printStackTrace();
         }
@@ -65,5 +77,12 @@ public class EmailService {
                 .replace("&","&amp;")
                 .replace("<","&lt;")
                 .replace(">","&gt;");
+    }
+
+    private String escapeJson(String s) {
+        return s == null ? "" : s
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n");
     }
 }
