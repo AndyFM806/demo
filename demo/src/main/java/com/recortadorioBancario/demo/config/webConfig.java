@@ -13,15 +13,19 @@ public class webConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/**")
-                        .allowedOrigins(
-                            "https://frontrecordatorio.onrender.com/",
-                            "http://localhost:5500"
+                registry.addMapping("/**")
+                        // 🌐 Dominios permitidos
+                        .allowedOriginPatterns(
+                                "https://frontrecordatorio.onrender.com", // tu frontend en Render
+                                "http://localhost:5500",                  // pruebas locales
+                                "http://127.0.0.1:5500"
                         )
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS") // 👈 AÑADIDO
+                        // ✅ Métodos HTTP permitidos
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
             }
         };
     }
 }
+
