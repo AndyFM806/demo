@@ -12,7 +12,7 @@ import java.net.http.HttpResponse;
 public class EmailService {
 
     // Tu API Key de Resend
-    private static final String RESEND_API_KEY = "re_YLcBL1jF_6Avmcd17gEUBGKhK7YcBNWLB";
+    private static final String RESEND_API_KEY = "RESEND_API_KEY";
 
     public void enviarCorreo(String destinatario, String asunto, String cuerpoPlano) {
         try {
