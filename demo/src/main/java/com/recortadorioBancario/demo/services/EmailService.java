@@ -13,7 +13,7 @@ public class EmailService {
     
 
     // Tu API Key de Resend
-    private static final String RESEND_API_KEY = "re_GoHwBDL8_A3f5zLgThxtZyLQjMhVUx2Gq";
+    private static final String RESEND_API_KEY = "re_4p4DnVxG_Mifd4V3PBshcnJXeW4oKw3Kg";
 
     public void enviarCorreo(String destinatario, String asunto, String cuerpoPlano) {
         
